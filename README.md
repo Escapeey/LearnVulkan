@@ -39,14 +39,15 @@ cd C:\Users\d00944037\Code\LearnVulkan
 >
 > **D2 材料已就绪**：讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) +
 > 骨架 `src/hello_triangle.cpp`（标着 `// TODO(ch02)` 的函数等你实现）+ 自检题 [`docs/ch02-check.md`](docs/ch02-check.md)。
-> **D2 – D5 材料均已备好**：每单元一份讲义 + 一份自检题。
-> [D2 实例与验证层](docs/ch02-instance-and-validation.md)（**含代码骨架**）·
+> **D2 – D6 讲义与自检题均已备好**：
+> [D2 实例与验证层](docs/ch02-instance-and-validation.md) ·
 > [D3 物理设备与队列](docs/ch03-physical-device-and-queues.md) ·
 > [D4 窗口表面与交换链探测](docs/ch04-window-surface-and-swapchain-probe.md) ·
-> [D5 交换链与图像视图](docs/ch05-swapchain-and-image-views.md)
+> [D5 交换链与图像视图](docs/ch05-swapchain-and-image-views.md) ·
+> [D6 着色器模块](docs/ch06-shader-modules.md)
 >
-> D5 的**代码骨架还没写** —— 等你做完 D2 并告诉我，我 review 你的实现后再往上补 TODO，
-> 避免你的文件里堆着一堆还没轮到你的标记。
+> **只有 D2 有代码骨架。** 其余单元的 `// TODO` 标记，等你做完前一单元、我 review 过你的
+> 实现之后再补 —— 免得 `src/hello_triangle.cpp` 里堆满还没轮到你的标记，反而看不清当前该写什么。
 
 ---
 
@@ -61,7 +62,7 @@ LearnVulkan/
 ├─ cmake/Shaders.cmake     GLSL -> SPIR-V 规则
 ├─ docs/
 │   ├─ opengl-to-vulkan.md   OpenGL -> Vulkan 职责对照词典（建议打印）
-│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D5 已备）
+│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D6 已备）
 │   └─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
 ├─ src/
 │   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）

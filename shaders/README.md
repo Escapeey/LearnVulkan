@@ -27,14 +27,26 @@ static std::vector<char> readFile(const std::string& filename) {
 
 调用：`readFile("shader.vert.spv")`
 
+## 当前文件
+
+| 文件 | 用途 | 引入单元 |
+|---|---|---|
+| `shader.vert` | 三角形顶点着色器 | D6 |
+| `shader.frag` | 三角形片元着色器 | D6 |
+
+两个文件**已经接进构建系统**（根 `CMakeLists.txt` 的 `add_shaders(learn_vulkan shader.vert shader.frag)`），
+所以每次构建都会重新编译。这样 D1 第一次构建就能验证 `glslc` 链路是否通。
+
 ## 新增着色器
 
-在根目录 `CMakeLists.txt` 里把文件名加进 `add_shaders(...)`：
+后续章节（D15 的 UBO、D18 的纹理、D23 的计算着色器等）会需要新的着色器。
+在根目录 `CMakeLists.txt` 里把文件名加进 `add_shaders(...)` 即可：
 
 ```cmake
 add_shaders(learn_vulkan
     shader.vert
     shader.frag
+    # 新加的就写在这里
 )
 ```
 

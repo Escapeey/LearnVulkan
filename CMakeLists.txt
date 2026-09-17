@@ -118,8 +118,12 @@ configure_vulkan_target(learn_vulkan)
 set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 target_compile_definitions(learn_vulkan PRIVATE SHADER_DIR="${SHADER_OUTPUT_DIR}")
 
-# 当前需要的着色器（后续章节逐个加进来）
+# 着色器：GLSL -> SPIR-V。每次构建都会重新编译，产物在 build/shaders/
+#
+# 为什么 D1 阶段就接上（而不是等到 D6）：
+#   这样你第一次跑 build.ps1 就会顺带验证 glslc 链路是否通 —— 路径、环境变量、
+#   自定义命令都对不对，一次暴露。否则要拖到 D6 才发现问题，前面几章白跑。
 add_shaders(learn_vulkan
-    # shader.vert
-    # shader.frag
+    shader.vert
+    shader.frag
 )

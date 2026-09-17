@@ -18,13 +18,18 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-// GLM：注意这两个宏。Vulkan 的深度范围是 [0, 1]，OpenGL 是 [-1, 1]。
-// 如果不定义 GLM_FORCE_DEPTH_ZERO_TO_ONE，投影矩阵会把深度映射错，
-// 表现是物体被深度测试莫名裁掉。这是 OpenGL 转 Vulkan 的一个经典坑。
-#define GLM_FORCE_RADIANS
+// GLM 线性代数。
+//
+// ⚠️ 下面这个宏是 Vulkan 必需的：Vulkan 的 NDC 深度范围是 [0, 1]，OpenGL 是 [-1, 1]。
+// 不定义它，glm::perspective 会按 OpenGL 约定生成投影矩阵，表现是物体被深度测试
+// 莫名其妙裁掉，且极难排查。这是 OpenGL 转 Vulkan 的经典坑之一。
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+// 注：教程《开发环境》章节还写了 #define GLM_FORCE_RADIANS。
+// 从 GLM 0.9.9 起「弧度」已经是唯一行为，GLM 1.0 已把该宏移除。
+// 本工程用 GLM 1.0.1，故意不定义它 —— 定义了轻则毫无作用，重则触发编译期报错。
 
 #include <cmath>
 #include <cstdlib>

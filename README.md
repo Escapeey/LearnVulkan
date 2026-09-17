@@ -83,6 +83,18 @@ LearnVulkan/
 5. **卡住**：把**验证层原文** + 你的代码贴给我（不要只说"报错了"）
 6. **通过**：我 review 你的实现，你写 3 行总结进 `PROGRESS.md`，`git tag` 存档
 
+### 与教程的差异（本工程有意偏离的地方）
+
+教程代码写于几年前，用的依赖版本和构建方式跟现在不完全一样。凡是本工程**故意**和教程不同的地方，都会记在这里，并说明原因 —— 遇到"Hmm 教程不是这么写的"时先查这张表。
+
+| 位置 | 教程写法 | 本工程 | 原因 |
+|---|---|---|---|
+| GLM 初始化 | `#define GLM_FORCE_RADIANS` + `GLM_FORCE_DEPTH_ZERO_TO_ONE` | **只保留** `GLM_FORCE_DEPTH_ZERO_TO_ONE` | `GLM_FORCE_RADIANS` 自 GLM 0.9.9 起已是空操作，1.0 直接移除了该宏。留着无用，还可能触发编译期报错 |
+| 构建方式 | Visual Studio `.vcxproj` 手动配置包含目录/库目录 | CMake + `FetchContent` | 命令行可验证，我能直接帮你编译排错；也免去手点一堆属性页 |
+| 依赖获取 | 手动下载 GLFW/GLM 压缩包 | CMake 自动拉取，失败时可切本地目录/镜像 | GitHub 国内不稳定，见 `third_party/README.md` |
+| 入口文件 | 每章从头写一个 `.cpp` | 一个 `src/hello_triangle.cpp` 一路长大 | 便于逐步 review 你的实现、也便于 `git diff` 看清每章改了什么 |
+| 环境自检 | 无 | 额外提供 `src/env_check.cpp` | 换机器/升级驱动后可重跑，快速确认环境没变 |
+
 ### 里程碑
 
 | 里程碑 | 内容 | 对应单元 |

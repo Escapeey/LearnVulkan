@@ -9,6 +9,13 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
+# MSVC 默认按系统 ANSI 代码页（中文 Windows 上是 GBK）读取源文件，
+# 会把 UTF-8 的中文注释读成乱码，甚至因为某个字节恰好是 0x5C('\') 而报奇怪的语法错误。
+# /utf-8 同时指定「源文件字符集」和「执行字符集」为 UTF-8，彻底避免这个问题。
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # ---------------------------------------------------------------------------
 # Vulkan SDK
 # ---------------------------------------------------------------------------
@@ -17,9 +24,9 @@ find_package(Vulkan REQUIRED)
 # 着色器编译规则（内含 glslc 查找）
 include(cmake/Shaders.cmake)
 
-message(STATUS "Vulkan 头文件 : ${Vulkan_INCLUDE_DIRS}")
-message(STATUS "Vulkan 库     : ${Vulkan_LIBRARIES}")
-message(STATUS "glslc         : ${GLSLC_EXECUTABLE}")
+message(STATUS "Vulkan include : ${Vulkan_INCLUDE_DIRS}")
+message(STATUS "Vulkan library : ${Vulkan_LIBRARIES}")
+message(STATUS "glslc          : ${GLSLC_EXECUTABLE}")
 
 # ---------------------------------------------------------------------------
 # 第三方库：GLFW（窗口）+ GLM（线性代数），首次 configure 时自动下载

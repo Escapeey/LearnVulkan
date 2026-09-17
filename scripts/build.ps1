@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     配置并编译 LearnVulkan。
 

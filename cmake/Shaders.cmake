@@ -18,8 +18,9 @@ function(add_shaders TARGET)
 
     if(NOT GLSLC_EXECUTABLE)
         message(WARNING
-            "找不到 glslc。请确认已安装 Vulkan SDK 并重启终端（VULKAN_SDK 环境变量必须生效）。"
-            " 着色器将不会被编译，运行时会加载 .spv 失败。")
+            "glslc not found. Install the Vulkan SDK and RESTART your terminal so that "
+            "the VULKAN_SDK environment variable takes effect. "
+            "Shaders will NOT be compiled and loading .spv will fail at runtime.")
         return()
     endif()
 

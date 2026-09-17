@@ -1,0 +1,28 @@
+# 构建产物
+build/
+out/
+cmake-build-*/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln
+*.vcxproj*
+
+# 编译中间产物
+*.obj
+*.o
+*.pdb
+*.ilk
+*.exe
+*.dll
+*.lib
+*.exp
+*.spv
+
+# 其他
+*.log
+Thumbs.db
+desktop.ini

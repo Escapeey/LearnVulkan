@@ -3,6 +3,10 @@ build/
 out/
 cmake-build-*/
 
+# 依赖源码（CMake 自动拉取或手动下载，不进仓库；third_party/README.md 仍然跟踪）
+third_party/glfw/
+third_party/glm/
+
 # Visual Studio / VS Code
 .vs/
 .vscode/

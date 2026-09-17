@@ -66,6 +66,7 @@ LearnVulkan/
 │   └─ env_check.cpp       D1 环境自检工具
 ├─ shaders/                GLSL 源码
 ├─ scripts/                build.ps1 / run.ps1
+├─ third_party/            GLFW / GLM 本地源码（可选，见其 README）
 └─ build/                  构建产物（已 gitignore）
 ```
 

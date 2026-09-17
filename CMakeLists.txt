@@ -29,10 +29,50 @@ message(STATUS "Vulkan library : ${Vulkan_LIBRARIES}")
 message(STATUS "glslc          : ${GLSLC_EXECUTABLE}")
 
 # ---------------------------------------------------------------------------
-# 第三方库：GLFW（窗口）+ GLM（线性代数），首次 configure 时自动下载
+# 第三方库：GLFW（窗口）+ GLM（线性代数）
+#
+# 依赖获取按优先级自动选择（详见 third_party/README.md）：
+#   1) -DGLFW_LOCAL_DIR=<路径>     显式指定本地源码目录
+#   2) third_party/glfw 已存在      用本地源码
+#   3) 从 GLFW_GIT_URL 拉取         默认 GitHub，国内可换镜像
+#
+# GitHub 拉不动时的两种救法（都不用改本文件）：
+#   配代理:  git config --global http.proxy http://127.0.0.1:7890
+#   换镜像:  cmake -S . -B build -DGLFW_GIT_URL=<镜像地址> -DGLM_GIT_URL=<镜像地址>
 # ---------------------------------------------------------------------------
 include(FetchContent)
 
+set(GLFW_GIT_URL "https://github.com/glfw/glfw.git"  CACHE STRING "GLFW 仓库地址")
+set(GLFW_GIT_TAG "3.4"                               CACHE STRING "GLFW 版本")
+set(GLM_GIT_URL  "https://github.com/g-truc/glm.git" CACHE STRING "GLM 仓库地址")
+set(GLM_GIT_TAG  "1.0.1"                             CACHE STRING "GLM 版本")
+
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+
+function(acquire_dependency NAME GIT_URL GIT_TAG)
+    set(local_var "${NAME}_LOCAL_DIR")
+    set(local_dir "")
+
+    if(DEFINED ${local_var} AND NOT "${${local_var}}" STREQUAL "")
+        set(local_dir "${${local_var}}")
+    elseif(EXISTS "${THIRD_PARTY_DIR}/${NAME}/CMakeLists.txt")
+        set(local_dir "${THIRD_PARTY_DIR}/${NAME}")
+    endif()
+
+    if(NOT "${local_dir}" STREQUAL "")
+        message(STATUS "依赖 ${NAME}: 使用本地源码 ${local_dir}")
+        add_subdirectory("${local_dir}" "${CMAKE_BINARY_DIR}/_deps/${NAME}-build")
+    else()
+        message(STATUS "依赖 ${NAME}: 从 ${GIT_URL} 拉取 (tag ${GIT_TAG})")
+        FetchContent_Declare(${NAME}
+            GIT_REPOSITORY "${GIT_URL}"
+            GIT_TAG        "${GIT_TAG}"
+            GIT_SHALLOW    TRUE)
+        FetchContent_MakeAvailable(${NAME})
+    endif()
+endfunction()
+
+# GLFW 的构建选项必须在它被加入之前设为 CACHE，否则会被 GLFW 自己的 option() 覆盖
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -40,17 +80,8 @@ set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_WAYLAND  OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_X11      OFF CACHE BOOL "" FORCE)
 
-FetchContent_Declare(glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.4
-    GIT_SHALLOW    TRUE)
-
-FetchContent_Declare(glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG        1.0.1
-    GIT_SHALLOW    TRUE)
-
-FetchContent_MakeAvailable(glfw glm)
+acquire_dependency(glfw "${GLFW_GIT_URL}" "${GLFW_GIT_TAG}")
+acquire_dependency(glm  "${GLM_GIT_URL}"  "${GLM_GIT_TAG}")
 
 # ---------------------------------------------------------------------------
 # 目标

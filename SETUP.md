@@ -152,6 +152,23 @@ cd C:\Users\d00944037\Code\LearnVulkan
 .\scripts\run.ps1 -Target env_check
 ```
 
+> ### ⚠️ 如果 `-Configure` 卡住或报 Git 错误
+>
+> 首次配置要从 GitHub 拉取 GLFW 和 GLM。**国内网络下这一步经常失败**（卡在 `Cloning into ...`，
+> 或报 `fatal: unable to access ... schannel: ...`）。
+>
+> **不要反复重试**，直接看 [`third_party/README.md`](third_party/README.md)，里面三条路：
+>
+> 1. 给 git 配代理（最省事）
+> 2. 换镜像源：`.\scripts\build.ps1 -Configure -GlfwUrl <镜像> -GlmUrl <镜像>`
+> 3. 手动下载 ZIP 解压到 `third_party/glfw` 和 `third_party/glm`（最可靠）
+>
+> `build.ps1` 现在会在配置前打印它对每个依赖打算用哪种方式 ——
+> 看到 `依赖 glfw : 本地源码 third_party\glfw` 就说明本地方式生效了。
+>
+> **另外**：`build.ps1` 现在会先做环境预检。如果 `cmake` 或 `VULKAN_SDK` 缺失，
+> 它会直接红字告诉你缺什么、去哪儿补，而不是抛一屏 CMake 报错。
+
 **期望输出**（窗口弹出，控制台打印类似）：
 
 ```

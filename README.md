@@ -39,9 +39,13 @@ cd C:\Users\d00944037\Code\LearnVulkan
 >
 > **D2 材料已就绪**：讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) +
 > 骨架 `src/hello_triangle.cpp`（标着 `// TODO(ch02)` 的函数等你实现）+ 自检题 [`docs/ch02-check.md`](docs/ch02-check.md)。
-> **D3 讲义也已备好**：[`docs/ch03-physical-device-and-queues.md`](docs/ch03-physical-device-and-queues.md) + [`docs/ch03-check.md`](docs/ch03-check.md)。
+> **D2 / D3 / D4 材料均已备好**：
+> [D2](docs/ch02-instance-and-validation.md)（含代码骨架）、
+> [D3](docs/ch03-physical-device-and-queues.md)、
+> [D4](docs/ch04-window-surface-and-swapchain-probe.md)。每个单元配 `chNN-check.md` 自检题。
 >
-> 每一轮我只提前备**下一个单元**的材料，避免你还没做 D2 就被 D10 的资料淹没。
+> 我只提前备**接下来两三个单元**的材料，避免你还没做完 D2 就被 D10 的资料淹没。
+> 等你做完一个单元并告诉我，我会针对你的实现 review，再补下一个单元。
 
 ---
 
@@ -57,9 +61,11 @@ LearnVulkan/
 ├─ docs/
 │   ├─ opengl-to-vulkan.md                 OpenGL -> Vulkan 职责对照词典
 │   ├─ ch02-instance-and-validation.md     D2 讲义  ┐
-│   ├─ ch02-check.md                       D2 自检题 ├ 已备课
-│   ├─ ch03-physical-device-and-queues.md  D3 讲义  │
-│   ├─ ch03-check.md                       D3 自检题 ┘
+│   ├─ ch02-check.md                       D2 自检题 │
+│   ├─ ch03-physical-device-and-queues.md  D3 讲义  ├ 已备课
+│   ├─ ch03-check.md                       D3 自检题 │
+│   ├─ ch04-window-surface-and-swapchain-probe.md  D4 讲义 │
+│   ├─ ch04-check.md                       D4 自检题 ┘
 │   └─ chNN-*.md                           后续单元（随进度生成）
 ├─ src/
 │   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）

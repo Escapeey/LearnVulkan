@@ -128,6 +128,33 @@ glslc --version
 
 ---
 
+## 已为你排查：教程官方 FAQ 里的 Windows 专属坑
+
+我按[教程官方 FAQ](https://tutorial.vulkan.net.cn/FAQ) 逐条查了你的机器，**结论是你目前是干净的**：
+
+| 教程 FAQ 条目 | 你的机器 | 影响 |
+|---|---|---|
+| MSI Afterburner / RivaTuner Statistics Server 导致**核心验证层访问冲突** | ✅ 未安装、未运行 | 这是 FAQ 第一条。如果装了，D2–D11 会随机崩在验证层内部，报 access violation，**极难定位到是它**。以后若装了，跑 Vulkan 前先退出它 |
+| Steam 覆盖层 `VK_LAYER_VALVE_steam_overlay` 让 `vkCreateSwapchainKHR` 报错 | ✅ 未安装 Steam | 注册表 `HKLM\SOFTWARE\Khronos\Vulkan\ImplicitLayers` 当前**不存在**，即没有任何第三方层会注入你的程序 |
+| 看不到任何验证层消息（程序一闪而过） | ⚠️ 要注意习惯 | 官方建议：VS 里用 **Ctrl-F5** 而不是 F5（Ctrl-F5 保留终端窗口）。用本工程的 `run.ps1` 没这问题，它把输出留在当前窗口并打印退出码 |
+| `vkCreateInstance` 返回 `VK_ERROR_INCOMPATIBLE_DRIVER` | ➖ 不适用 | 这是 macOS + MoltenVK 特有的，Windows 遇不到 |
+| SDK 版本须 ≥ 1.1.106 才有 `VK_LAYER_KHRONOS_validation` | ✅ 满足 | 我们会装 1.4.x |
+
+**以后想复查这项**（比如你装了 Afterburner 或 Steam 之后），在 PowerShell 里跑：
+
+```powershell
+# 有没有冲突进程在跑
+Get-Process | Where-Object { $_.ProcessName -match 'Afterburner|RTSS|RivaTuner|steam' }
+
+# 系统里注册了哪些会注入到每个 Vulkan 程序的隐式层
+Get-Item 'HKLM:\SOFTWARE\Khronos\Vulkan\ImplicitLayers' -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty Property
+```
+
+第二条如果打印出东西来，说明有第三方层在全局注入 —— 遇到莫名其妙的崩溃时，这是第一个要怀疑的对象。
+
+---
+
 ## 步骤 4：跑通冒烟测试
 
 工程骨架已经搭好（`CMakeLists.txt` + `src/env_check.cpp` + `scripts/`），自检程序是教程"开发环境"章节那个测试程序的加强版。

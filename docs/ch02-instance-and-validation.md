@@ -4,7 +4,7 @@
 > [实例](https://tutorial.vulkan.net.cn/Drawing_a_triangle/Setup/Instance) ·
 > [验证层](https://tutorial.vulkan.net.cn/Drawing_a_triangle/Setup/Validation_layers)
 >
-> 代码骨架：`src/main.cpp`（所有 `// TODO(ch02)` 由你实现）
+> 代码骨架：`src/hello_triangle.cpp`（所有 `// TODO(ch02)` 由你实现）
 > 自检题：`docs/ch02-check.md`
 
 ---

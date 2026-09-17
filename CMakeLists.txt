@@ -53,18 +53,35 @@ FetchContent_Declare(glm
 FetchContent_MakeAvailable(glfw glm)
 
 # ---------------------------------------------------------------------------
-# 本体
+# 目标
+#
+#   env_check      D1 环境自检工具（独立于教程，永久保留）
+#   learn_vulkan   教程主程序，跟着章节一路长大
 # ---------------------------------------------------------------------------
-add_executable(learn_vulkan src/main.cpp)
 
-if(TARGET Vulkan::Vulkan)
-    target_link_libraries(learn_vulkan PRIVATE Vulkan::Vulkan)
-else()
-    target_include_directories(learn_vulkan PRIVATE ${Vulkan_INCLUDE_DIRS})
-    target_link_libraries(learn_vulkan PRIVATE ${Vulkan_LIBRARIES})
-endif()
+# 两个目标共用的链接与调试设置
+function(configure_vulkan_target TARGET)
+    if(TARGET Vulkan::Vulkan)
+        target_link_libraries(${TARGET} PRIVATE Vulkan::Vulkan)
+    else()
+        target_include_directories(${TARGET} PRIVATE ${Vulkan_INCLUDE_DIRS})
+        target_link_libraries(${TARGET} PRIVATE ${Vulkan_LIBRARIES})
+    endif()
 
-target_link_libraries(learn_vulkan PRIVATE glfw glm::glm)
+    target_link_libraries(${TARGET} PRIVATE glfw glm::glm)
+
+    # 调试时的工作目录 = 可执行文件所在目录
+    set_target_properties(${TARGET} PROPERTIES
+        VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${TARGET}>")
+endfunction()
+
+# --- D1 环境自检 -----------------------------------------------------------
+add_executable(env_check src/env_check.cpp)
+configure_vulkan_target(env_check)
+
+# --- 教程主程序 ------------------------------------------------------------
+add_executable(learn_vulkan src/hello_triangle.cpp)
+configure_vulkan_target(learn_vulkan)
 
 # 着色器产物目录，运行时用 SHADER_DIR 定位 .spv，避免受工作目录影响
 set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
@@ -75,7 +92,3 @@ add_shaders(learn_vulkan
     # shader.vert
     # shader.frag
 )
-
-# 调试时的工作目录 = 可执行文件所在目录
-set_target_properties(learn_vulkan PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:learn_vulkan>")

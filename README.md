@@ -22,13 +22,23 @@
 ```powershell
 cd C:\Users\d00944037\Code\LearnVulkan
 
-.\scripts\build.ps1 -Configure   # 首次配置（联网拉取 GLFW / GLM）
-.\scripts\build.ps1              # 编译
-.\scripts\run.ps1                # 运行
+.\scripts\build.ps1 -Configure        # 首次配置（联网拉取 GLFW / GLM）
+.\scripts\build.ps1                   # 编译
+.\scripts\run.ps1 -Target env_check   # D1：跑环境自检
 ```
 
-> **现在是 D1**：`src/main.cpp` 是环境自检程序。跑通它、看到"结论：全部通过 ✅"，
-> 再回 `PROGRESS.md` 给 D1 打勾，然后我们开始 D2。
+编译出两个目标：
+
+| 目标 | 文件 | 用途 |
+|---|---|---|
+| `env_check` | `src/env_check.cpp` | D1 环境自检（换机器/升级驱动后可重跑） |
+| `learn_vulkan` | `src/hello_triangle.cpp` | **教程主程序**，跟着章节一路长大 |
+
+> **当前进度：D1**（环境搭建）
+> 跑通 `.\scripts\run.ps1 -Target env_check`、看到"结论：全部通过 ✅"，回 `PROGRESS.md` 给 D1 打勾。
+>
+> **D2 材料已就绪**：讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) +
+> 骨架 `src/hello_triangle.cpp`（标着 `// TODO(ch02)` 的函数等你实现）+ 自检题 [`docs/ch02-check.md`](docs/ch02-check.md)。
 
 ---
 
@@ -43,9 +53,12 @@ LearnVulkan/
 ├─ cmake/Shaders.cmake     GLSL -> SPIR-V 规则
 ├─ docs/
 │   ├─ opengl-to-vulkan.md OpenGL -> Vulkan 职责对照
+│   ├─ ch02-instance-and-validation.md   D2 讲义
+│   ├─ ch02-check.md                     D2 自检题
 │   └─ chNN-*.md           每单元讲义（随进度生成）
 ├─ src/
-│   └─ main.cpp            当前正在写的代码
+│   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）
+│   └─ env_check.cpp       D1 环境自检工具
 ├─ shaders/                GLSL 源码
 ├─ scripts/                build.ps1 / run.ps1
 └─ build/                  构建产物（已 gitignore）

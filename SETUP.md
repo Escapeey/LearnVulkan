@@ -112,7 +112,14 @@ glslc --version
 
 ## 步骤 4：跑通冒烟测试
 
-我已经把工程骨架搭好了（`CMakeLists.txt` + `src/main.cpp` + `scripts/`），它是教程"开发环境"章节的那个测试程序的等价物。
+工程骨架已经搭好（`CMakeLists.txt` + `src/env_check.cpp` + `scripts/`），自检程序是教程"开发环境"章节那个测试程序的加强版。
+
+它编译出两个目标，D1 只关心 `env_check`：
+
+| 目标 | 文件 | 用途 |
+|---|---|---|
+| `env_check` | `src/env_check.cpp` | **D1 环境自检**（本页要跑的） |
+| `learn_vulkan` | `src/hello_triangle.cpp` | 教程主程序，D2 起才开始写 |
 
 ```powershell
 cd C:\Users\d00944037\Code\LearnVulkan
@@ -120,11 +127,11 @@ cd C:\Users\d00944037\Code\LearnVulkan
 # 配置（首次会联网拉取 GLFW 和 GLM 源码，约 1-2 分钟）
 .\scripts\build.ps1 -Configure
 
-# 编译
+# 编译（两个目标一起编）
 .\scripts\build.ps1
 
-# 运行
-.\scripts\run.ps1
+# 运行 D1 环境自检
+.\scripts\run.ps1 -Target env_check
 ```
 
 **期望输出**（窗口弹出，控制台打印类似）：

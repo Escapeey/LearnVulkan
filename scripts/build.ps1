@@ -38,7 +38,10 @@ Write-Host "编译 ($Config) ..." -ForegroundColor Cyan
 cmake --build $buildDir --config $Config
 if ($LASTEXITCODE -ne 0) { throw "编译失败 (exit $LASTEXITCODE)" }
 
-$exe = Join-Path $buildDir "$Config\learn_vulkan.exe"
 Write-Host ""
-Write-Host "编译成功: $exe" -ForegroundColor Green
-Write-Host "运行:     .\scripts\run.ps1 -Config $Config" -ForegroundColor Green
+Write-Host "编译成功。可执行文件：" -ForegroundColor Green
+Write-Host "  $buildDir\$Config\learn_vulkan.exe   (教程主程序)" -ForegroundColor Green
+Write-Host "  $buildDir\$Config\env_check.exe      (D1 环境自检)" -ForegroundColor Green
+Write-Host ""
+Write-Host "运行:  .\scripts\run.ps1                       # 教程主程序" -ForegroundColor Green
+Write-Host "       .\scripts\run.ps1 -Target env_check     # 环境自检" -ForegroundColor Green

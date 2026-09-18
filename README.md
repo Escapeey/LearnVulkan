@@ -41,13 +41,19 @@ cd C:\Users\d00944037\Code\LearnVulkan
 > `env_check.exe` 自检**全部通过**（loader 1.4.357 / 13 个实例扩展 / 9 个层，含 `VK_LAYER_KHRONOS_validation`）。
 >
 > ### 👉 下一步：做 **D2**（基础代码 + Instance + 验证层）
-> 1. 读讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md)
-> 2. 实现 `src/hello_triangle.cpp` 里那 10 处 `// TODO(ch02)`
-> 3. `.\scripts\build.ps1` → `.\scripts\run.ps1`
-> 4. 卡住就把**验证层报错原文**贴给我
+> 1. 先看 **[`docs/ch02-steps.md`](docs/ch02-steps.md)** —— 把 10 个函数拆成 5 个有即时反馈的检查点，
+>    照着做，别一次全写完再调错
+> 2. 讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) 查原理
+> 3. 实现 `src/hello_triangle.cpp` 里那 10 处 `// TODO(ch02)`
+> 4. `.\scripts\build.ps1` → `.\scripts\run.ps1`
+> 5. 卡住就把**验证层报错原文**贴给我
 >
 > ⚠️ **现在直接跑 `learn_vulkan.exe` 会崩** —— `initWindow()` 还是空的 TODO，`window` 是 `nullptr`。
-> 这是正常的，实现完 D2 就好了。
+> 这是正常的，检查点 1 就是解决它。
+>
+> ✅ **你的起点已验证过**：我照这份骨架写了份临时参考实现，**签名一行没改就编译通过**，
+> 正常路径跑出 `消息总数=0 ERROR=0`，故意犯错路径精确报出 `VUID-vkDestroyInstance-instance-00629`。
+> 所以如果你卡住，**不是骨架的问题**，把报错贴给我就行。
 >
 > **D2 – D6 讲义与自检题均已备好**：
 > [D2 实例与验证层](docs/ch02-instance-and-validation.md) ·
@@ -73,7 +79,8 @@ LearnVulkan/
 ├─ docs/
 │   ├─ opengl-to-vulkan.md   OpenGL -> Vulkan 职责对照词典（建议打印）
 │   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D6 已备）
-│   └─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
+│   ├─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
+│   └─ ch02-steps.md         D2 的**分步实现指南**（5 个检查点，边写边验证）
 ├─ src/
 │   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）
 │   └─ env_check.cpp       D1 环境自检工具

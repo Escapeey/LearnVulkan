@@ -81,6 +81,7 @@
 | 首次构建 | D1 | 拉依赖卡死/失败 | **github.com 在你这台机器上 TCP 连不上**（21 秒超时），gitee.com 正常 | 默认源改成 `gitee.com/mirrors/*`，并把依赖克隆到本地 `third_party/` |
 | 首次构建 | D1 | `env_check.cpp` 报 C2039：`name` 不是 `VkExtensionProperties` 的成员 | 我把字段名写成 `ext.name`，正确的是 **`ext.extensionName`** | 修正 3 处 |
 | 首次构建 | D1 | 验证层只被"**枚举**"过，从没验证过能否**加载 + 回调** | `vkEnumerateInstanceLayerProperties` 只读 manifest 文件，不加载 layer DLL —— 这两件事完全不同，D2 全靠后者 | 写了一次性探针实测：`VkLayer_khronos_validation.dll` 成功加载 → `vkCreateInstance` = VK_SUCCESS → 故意泄漏 messenger 拿到 `VUID-vkDestroyInstance-instance-00629` → 共收到 **79 条**验证层消息。**结论：D2 的机制是通的**。探针已删除，不留答案在仓库里 |
+| 备课 | D2 | 骨架的 10 个函数"能不能按这个签名实现"没验证过 | 万一某个签名有坑，你会以为是自己写错了，白折腾 | 照骨架写了份**临时参考实现**：`src/hello_triangle.cpp` 的签名**一行没改就编译通过**。两条路径实测：正常销毁 → `消息总数=0 ERROR=0`；故意泄漏 messenger → 精确报出 `VUID-vkDestroyInstance-instance-00629`，点名句柄。**结论：你的起点是干净的、可实现的。** 参考实现已删除 |
 | | | | | |
 
 ---

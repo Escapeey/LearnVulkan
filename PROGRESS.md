@@ -75,10 +75,41 @@
 | 日期 | 单元 | 现象 | 根因 | 解决 |
 |---|---|---|---|---|
 | 首次构建 | D1 | 预检误报"找不到 cmake"，但其实已装 | VS 自带的 CMake 在 `Common7\IDE\CommonExtensions\...`，**不在 PATH 上** | `build.ps1` 增加 `Find-CMake`，PATH 找不到就去 VS 安装目录翻 |
-| 首次构建 | D1 | 配置到 glm 处脚本静默退出，无报错 | `build.ps1` 用了 `$ErrorActionPreference='Stop'`，PowerShell 5.1 把**原生程序写到 stderr 的任何内容**当终止性错误；CMake 的 deprecation warning 和 MSBuild 版本横幅都在 stderr | 改成 `Continue` + 显式检查 `$LASTEXITCODE`，并把原生调用的 `2>&1` 并进 stdout |
+| 首次构建 | D1 | 配置到 glm 处脚本退出（exit 1），日志停在 `-- 依赖 glm: 使用本地源码` | **⚠️ 根因至今未确认。** 真正的 CMake 报错写进了 **stderr**，而我用的 `Tee-Object` **只捕获 stdout** —— 报错文本根本没落盘。只看到一个 glm 的 `cmake_minimum_required` 弃用警告 | 同一轮改了三处（`ErrorActionPreference` Stop→Continue、原生调用把 stderr 并进 stdout、加 `CMAKE_POLICY_VERSION_MINIMUM 3.5`）后就好了。但**事后单独撤销任一处都无法复现失败**，所以不能确定是哪一处修好的 |
 | 首次构建 | D1 | 生成器 `Visual Studio 17 2022` 不存在 | 实际装的是 **VS 18（2026）**，我硬编码了 17 | `build.ps1` 改为从 `cmake --help` 自动探测编号最大的 VS 生成器 |
 | 首次构建 | D1 | CMake 4.x 对 GLM 报 `cmake_minimum_required` 弃用 | CMake 4.x 移除了对 `VERSION < 3.5` 的兼容 | 在根 `CMakeLists.txt` 设 `CMAKE_POLICY_VERSION_MINIMUM 3.5` |
 | 首次构建 | D1 | 拉依赖卡死/失败 | **github.com 在你这台机器上 TCP 连不上**（21 秒超时），gitee.com 正常 | 默认源改成 `gitee.com/mirrors/*`，并把依赖克隆到本地 `third_party/` |
 | 首次构建 | D1 | `env_check.cpp` 报 C2039：`name` 不是 `VkExtensionProperties` 的成员 | 我把字段名写成 `ext.name`，正确的是 **`ext.extensionName`** | 修正 3 处 |
 | 首次构建 | D1 | 验证层只被"**枚举**"过，从没验证过能否**加载 + 回调** | `vkEnumerateInstanceLayerProperties` 只读 manifest 文件，不加载 layer DLL —— 这两件事完全不同，D2 全靠后者 | 写了一次性探针实测：`VkLayer_khronos_validation.dll` 成功加载 → `vkCreateInstance` = VK_SUCCESS → 故意泄漏 messenger 拿到 `VUID-vkDestroyInstance-instance-00629` → 共收到 **79 条**验证层消息。**结论：D2 的机制是通的**。探针已删除，不留答案在仓库里 |
 | | | | | |
+
+---
+
+## 📌 这次排查最大的教训：报错文本要第一时间完整落盘
+
+上面第 2 条（"配置到 glm 处退出"）的根因我**最终没查出来**。原因不是问题太难，而是**我把证据弄丢了**：
+
+我当时这样重定向：
+
+```powershell
+& .\scripts\build.ps1 -Clean 2>&1 | Tee-Object -FilePath build.log
+```
+
+`Tee-Object` **只捕获 stdout**。而 CMake 的报错走 **stderr** —— 于是日志"干干净净地"停在一行无害的弃用警告上，**真正的错误文本一行都没存下来**。等我想回头查根因时，现场已经被后续修改覆盖了，只能靠猜。
+
+### 正确做法
+
+```powershell
+# 让脚本内部就把 stderr 并进 stdout（build.ps1 现在就是这么做的）
+& $cmakeExe @cmakeArgs 2>&1 | ForEach-Object { Write-Host $_ }
+
+# 或者在命令行重定向【所有】流
+.\scripts\build.ps1 *> build.log
+```
+
+### 这条教训直接适用于 Vulkan
+
+**验证层默认往 `stderr` 输出**（教程的 `debugCallback` 就是 `std::cerr << ...`）。
+如果你只重定向 stdout 去看日志，你会得到"程序什么都没说"的假象 —— 然后开始怀疑自己的代码。
+
+**D2 起就会遇到这个场景。** 记住：Vulkan 的报错在 stderr。

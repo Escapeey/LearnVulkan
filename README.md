@@ -70,6 +70,37 @@ cd C:\Users\d00944037\Code\LearnVulkan
 
 ---
 
+## 构建方式：命令行（已选定方案 A）
+
+**权威构建走命令行**，Visual Studio 只当代码编辑器用（看代码、跳转、补全）。
+
+```powershell
+.\scripts\build.ps1                       # 配置 + 编译 → 产物在 build\Debug\
+.\scripts\run.ps1                         # 跑教程主程序
+.\scripts\run.ps1 -Target env_check       # 跑 D1 环境自检
+```
+
+### ⚠️ 会有两套构建目录，别搞混
+
+| 目录 | 谁生成的 | 生成器 | 用途 |
+|---|---|---|---|
+| **`build\`** | **`scripts\build.ps1`** | Visual Studio 18 2026（MSBuild） | **权威** —— exe 在 `build\Debug\` |
+| `out\build\x64-Debug\` | Visual Studio 自己 | Ninja | 只喂给 VS 的 IntelliSense，**不要在这里构建** |
+
+VS 打开这个文件夹时会自动在 `out\build\` 里配一套（这样跳转/补全才能工作），**不影响**命令行那套。
+两者互不干扰，也都被 `.gitignore` 挡住了。
+
+**规则**：
+
+- ✅ 要编译、要运行 → `.\scripts\build.ps1` / `.\scripts\run.ps1`
+- ❌ 不要在 VS 里按 F5 / "生成" —— exe 会落到 `out\build\`，和命令行那套脱节
+- 🖊️ VS 里就当编辑器：看代码、`Ctrl+点击` 跳转、看 IntelliSense 报错
+
+> `run.ps1` 会**两个目录都找**。万一用的是 VS 那棵树，它会黄字提醒你。
+> 另外 `out\` 目录可以随时删掉（VS 会重建），不影响命令行构建。
+
+---
+
 ## 目录结构
 
 ```

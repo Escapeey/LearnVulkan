@@ -341,13 +341,48 @@ vkCreateInstance(&createInfo, nullptr, &instance);
 
 教程在"测试"一节要求你：**暂时删掉 `cleanup()` 里对 `DestroyDebugUtilsMessengerEXT` 的调用**，然后运行。
 
-退出后你会看到类似：
+### 你大概会看到什么
+
+下面这段是**我在你这台机器上实测跑出来的**（Vulkan SDK 1.4.357.0 + Intel UHD 630），不是编的：
 
 ```
-validation layer: Validation Error: [ VUID-vkDestroyInstance-instance-00629 ] Object 0: handle = 0x... , type = VK_OBJECT_TYPE_DEBUG_UTILS_MESSENGER_EXT; ...
+[ERROR] vkDestroyInstance(): VkInstance 0x2329a87d3d0 has 1 leaked objects that have not been destroyed.
+VkDebugUtilsMessengerEXT 0x10000000001
+The Vulkan spec states: All child objects that were created with instance or with a VkPhysicalDevice
+retrieved from it, and that can be destroyed or freed, must have been destroyed or freed prior to
+destroying instance
+(https://docs.vulkan.org/spec/latest/chapters/initialization.html#VUID-vkDestroyInstance-instance-00629)
 ```
 
-**这一步的价值远超它花的时间**：你第一次亲眼看到验证层如何精确指出"你泄漏了哪个对象、在哪一步违反了什么规则（VUID）"。以后所有报错你都会读得懂。
+**怎么读它**：
+
+| 片段 | 含义 |
+|---|---|
+| `[ERROR]` | 严重性等级（你在 callback 里拿到的 `messageSeverity`） |
+| `has 1 leaked objects` | **泄漏了几个** |
+| `VkDebugUtilsMessengerEXT 0x10000000001` | **泄漏的是哪个类型、哪个句柄** —— 直接点名 |
+| `VUID-vkDestroyInstance-instance-00629` | 违反了规范的哪一条。VUID = Vulkan Unique ID，搜这个编号能查到规范原文 |
+
+**这一步的价值远超它花的时间**：你第一次亲眼看到验证层如何精确指出"你泄漏了哪个对象、在哪一步违反了什么规则"。以后所有报错你都会读得懂。
+
+### ⚠️ 反过来更重要：如果你运行后【什么都没看到】
+
+那说明有问题，不是"通过"：
+
+1. `enableValidationLayers` 是 `false` —— 检查你是不是在用 **Release** 构建（`NDEBUG` 会把它关掉）
+2. debug messenger 没创建成功 —— 检查 `CreateDebugUtilsMessengerEXT` 的返回值
+3. `messageSeverity` 把 ERROR 过滤掉了
+4. SDK / 层没装好 —— 跑 `.\scripts\run.ps1 -Target env_check` 确认
+
+**"什么都没看到"和"看到上面那段报错"含义完全相反。** 别把静默当成功。
+
+### 附：控制台被刷屏怎么办
+
+如果你把 `VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT` 也打开了，会看到几十条 loader 的
+INFO 消息（`Searching for implicit layer manifest files` / `Found manifest file ...` 之类），
+把真正的报错淹没掉。教程故意不含 INFO 就是为了避开这个。
+
+**建议日常只留 `WARNING_BIT_EXT | ERROR_BIT_EXT`**，需要深挖时再临时打开 VERBOSE。
 
 **做完记得改回来。** 然后在 `PROGRESS.md` 的踩坑表里记一行。
 
@@ -356,8 +391,9 @@ validation layer: Validation Error: [ VUID-vkDestroyInstance-instance-00629 ] Ob
 ## 11. 本单元完成标志
 
 - [ ] 窗口正常出现，关闭窗口后程序返回 0
-- [ ] 控制台能看到验证层输出（哪怕只是 INFO 级）
-- [ ] 完成了"故意不销毁 messenger"实验，并读懂了报错
+- [ ] 启动时**没有**抛 "validation layers requested, but not available!"
+- [ ] 完成了"故意不销毁 messenger"实验，**并且确实看到了那条 `VUID-vkDestroyInstance-instance-00629` 报错**
+      （什么都没看到 = 没通过，见第 10 节）
 - [ ] 能回答 `docs/ch02-check.md` 的全部问题
 - [ ] `PROGRESS.md` 里 D2 打勾 + 写了 3 行总结
 

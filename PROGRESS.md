@@ -80,4 +80,5 @@
 | 首次构建 | D1 | CMake 4.x 对 GLM 报 `cmake_minimum_required` 弃用 | CMake 4.x 移除了对 `VERSION < 3.5` 的兼容 | 在根 `CMakeLists.txt` 设 `CMAKE_POLICY_VERSION_MINIMUM 3.5` |
 | 首次构建 | D1 | 拉依赖卡死/失败 | **github.com 在你这台机器上 TCP 连不上**（21 秒超时），gitee.com 正常 | 默认源改成 `gitee.com/mirrors/*`，并把依赖克隆到本地 `third_party/` |
 | 首次构建 | D1 | `env_check.cpp` 报 C2039：`name` 不是 `VkExtensionProperties` 的成员 | 我把字段名写成 `ext.name`，正确的是 **`ext.extensionName`** | 修正 3 处 |
+| 首次构建 | D1 | 验证层只被"**枚举**"过，从没验证过能否**加载 + 回调** | `vkEnumerateInstanceLayerProperties` 只读 manifest 文件，不加载 layer DLL —— 这两件事完全不同，D2 全靠后者 | 写了一次性探针实测：`VkLayer_khronos_validation.dll` 成功加载 → `vkCreateInstance` = VK_SUCCESS → 故意泄漏 messenger 拿到 `VUID-vkDestroyInstance-instance-00629` → 共收到 **79 条**验证层消息。**结论：D2 的机制是通的**。探针已删除，不留答案在仓库里 |
 | | | | | |

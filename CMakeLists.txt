@@ -39,12 +39,12 @@ message(STATUS "glslc          : ${GLSLC_EXECUTABLE}")
 #
 # 依赖获取按优先级自动选择（详见 third_party/README.md）：
 #   1) -DGLFW_LOCAL_DIR=<路径>     显式指定本地源码目录
-#   2) third_party/glfw 已存在      用本地源码
-#   3) 从 GLFW_GIT_URL 拉取         默认 GitHub，国内可换镜像
+#   2) third_party/glfw 已存在      用本地源码（本机当前就是这条，不需要联网）
+#   3) 从 GLFW_GIT_URL 拉取         默认 Gitee 镜像，见下方说明
 #
-# GitHub 拉不动时的两种救法（都不用改本文件）：
+# 想换源或配代理（都不用改本文件）：
 #   配代理:  git config --global http.proxy http://127.0.0.1:7890
-#   换镜像:  cmake -S . -B build -DGLFW_GIT_URL=<镜像地址> -DGLM_GIT_URL=<镜像地址>
+#   换镜像:  cmake -S . -B build -DGLFW_GIT_URL=<地址> -DGLM_GIT_URL=<地址>
 # ---------------------------------------------------------------------------
 include(FetchContent)
 

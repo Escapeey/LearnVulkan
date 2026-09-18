@@ -84,7 +84,8 @@ LearnVulkan/
 │   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D6 已备）
 │   ├─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
 │   ├─ ch02-steps.md         D2 的**分步实现指南**（5 个检查点，边写边验证）
-│   └─ your-gpu.md          **你这台机器的实测硬件数据**（各单元都要对照）
+│   ├─ your-gpu.md          **你这台机器的实测硬件数据**（各单元都要对照）
+│   └─ verified.md          **已实测验证 vs 未验证清单**（该信任到什么程度）
 ├─ src/
 │   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）
 │   └─ env_check.cpp       D1 环境自检工具

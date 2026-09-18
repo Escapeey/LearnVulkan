@@ -118,6 +118,20 @@ private:
     }
 
     void mainLoop() {
+        // ⚠️ 骨架专用保护，不是教程内容。
+        //
+        // 如果 initWindow() 还没实现，window 就是 nullptr。此时直接进下面的循环，
+        // glfwWindowShouldClose(nullptr) 会触发 GLFW 内部 window.c 的 assert，
+        // 在 Debug 构建下【弹出模态对话框把程序彻底挂住】—— 没有输出、没有报错、
+        // 终端不返回，最难排查的一种失败。
+        //
+        // 这几行把它变成一条明确的异常信息。实现完 initWindow() 后可以删掉（留着也无害）。
+        if (window == nullptr) {
+            throw std::runtime_error(
+                "window 是 nullptr —— 你还没实现 initWindow()。"
+                "见 docs/ch02-steps.md 的检查点 1。");
+        }
+
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
         }

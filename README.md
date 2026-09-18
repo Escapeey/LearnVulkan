@@ -48,8 +48,11 @@ cd C:\Users\d00944037\Code\LearnVulkan
 > 4. `.\scripts\build.ps1` → `.\scripts\run.ps1`
 > 5. 卡住就把**验证层报错原文**贴给我
 >
-> ⚠️ **现在直接跑 `learn_vulkan.exe` 会崩** —— `initWindow()` 还是空的 TODO，`window` 是 `nullptr`。
-> 这是正常的，检查点 1 就是解决它。
+> ℹ️ **现在跑 `learn_vulkan.exe` 会立刻报一句 `window 是 nullptr —— 你还没实现 initWindow()` 然后退出**，
+> 这是骨架里的保护，检查点 1 就是解决它。
+>
+> （没有这个保护的话，`glfwWindowShouldClose(nullptr)` 会触发 GLFW 内部 `window.c` 的 assert，
+> 在 Debug 构建下**弹模态对话框把程序彻底挂住** —— 没输出、终端不返回，是最难查的一种失败。实测过。）
 >
 > ✅ **你的起点已验证过**：我照这份骨架写了份临时参考实现，**签名一行没改就编译通过**，
 > 正常路径跑出 `消息总数=0 ERROR=0`，故意犯错路径精确报出 `VUID-vkDestroyInstance-instance-00629`。

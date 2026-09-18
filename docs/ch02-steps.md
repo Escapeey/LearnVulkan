@@ -19,7 +19,9 @@ cd C:\Users\d00944037\Code\LearnVulkan
 .\scripts\build.ps1        # 确认当前骨架能编译（应该秒过）
 ```
 
-现在程序能编译，但**跑起来会崩** —— `window` 是 `nullptr`。这正是检查点 1 要解决的。
+现在程序能编译，但**跑起来会立刻报一句** `window 是 nullptr —— 你还没实现 initWindow()` 然后退出。
+那是骨架里的保护（没有它，GLFW 会因 `window == nullptr` 触发 assert，在 Debug 下弹模态框把程序挂死）。
+这正是检查点 1 要解决的。
 
 ---
 

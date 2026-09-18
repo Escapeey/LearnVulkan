@@ -122,9 +122,9 @@ void checkInstanceExtensions(Report& report) {
     bool hasDebugUtils = false;
     bool hasWin32Surface = false;
     for (const auto& ext : extensions) {
-        report.info(std::string("  - ") + ext.name + "  (rev " + std::to_string(ext.specVersion) + ")");
-        if (std::strcmp(ext.name, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0) hasDebugUtils = true;
-        if (std::strcmp(ext.name, "VK_KHR_win32_surface") == 0)          hasWin32Surface = true;
+        report.info(std::string("  - ") + ext.extensionName + "  (rev " + std::to_string(ext.specVersion) + ")");
+        if (std::strcmp(ext.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0) hasDebugUtils = true;
+        if (std::strcmp(ext.extensionName, "VK_KHR_win32_surface") == 0)          hasWin32Surface = true;
     }
 
     // 这两个扩展是 D2/D4 的硬需求，提前告诉你结果，省得到时候一脸茫然
@@ -239,6 +239,9 @@ int main() {
     }
     std::cout << "===============================================\n";
     std::cout << "\n（按 ESC 或关闭窗口退出）\n";
+
+    // stdout 重定向到文件时是全缓冲，进窗口循环前先冲一次，保证报告完整落盘
+    std::cout.flush();
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();

@@ -22,9 +22,9 @@
 ```powershell
 cd C:\Users\d00944037\Code\LearnVulkan
 
-.\scripts\build.ps1 -Configure        # 首次配置（联网拉取 GLFW / GLM）
-.\scripts\build.ps1                   # 编译
-.\scripts\run.ps1 -Target env_check   # D1：跑环境自检
+.\scripts\build.ps1                   # 配置 + 编译（依赖已在 third_party\，不需要联网）
+.\scripts\run.ps1 -Target env_check   # 环境自检（换机器/升级驱动后可重跑）
+.\scripts\run.ps1                     # 教程主程序（D2 实现完之后才有画面）
 ```
 
 编译出两个目标：
@@ -34,11 +34,21 @@ cd C:\Users\d00944037\Code\LearnVulkan
 | `env_check` | `src/env_check.cpp` | D1 环境自检（换机器/升级驱动后可重跑） |
 | `learn_vulkan` | `src/hello_triangle.cpp` | **教程主程序**，跟着章节一路长大 |
 
-> **当前进度：D1**（环境搭建）
-> 跑通 `.\scripts\run.ps1 -Target env_check`、看到"结论：全部通过 ✅"，回 `PROGRESS.md` 给 D1 打勾。
+> ## ✅ 当前进度：**D1 已完成**（实测通过）
 >
-> **D2 材料已就绪**：讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) +
-> 骨架 `src/hello_triangle.cpp`（标着 `// TODO(ch02)` 的函数等你实现）+ 自检题 [`docs/ch02-check.md`](docs/ch02-check.md)。
+> 环境已就绪：VS **18 (2026)** + Vulkan SDK **1.4.357.0** + CMake 4.3.1；
+> GLFW 3.4 / GLM 1.0.1 已克隆到本地 `third_party/`；
+> `env_check.exe` 自检**全部通过**（loader 1.4.357 / 13 个实例扩展 / 9 个层，含 `VK_LAYER_KHRONOS_validation`）。
+>
+> ### 👉 下一步：做 **D2**（基础代码 + Instance + 验证层）
+> 1. 读讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md)
+> 2. 实现 `src/hello_triangle.cpp` 里那 10 处 `// TODO(ch02)`
+> 3. `.\scripts\build.ps1` → `.\scripts\run.ps1`
+> 4. 卡住就把**验证层报错原文**贴给我
+>
+> ⚠️ **现在直接跑 `learn_vulkan.exe` 会崩** —— `initWindow()` 还是空的 TODO，`window` 是 `nullptr`。
+> 这是正常的，实现完 D2 就好了。
+>
 > **D2 – D6 讲义与自检题均已备好**：
 > [D2 实例与验证层](docs/ch02-instance-and-validation.md) ·
 > [D3 物理设备与队列](docs/ch03-physical-device-and-queues.md) ·

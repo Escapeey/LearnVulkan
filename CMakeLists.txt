@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 project(LearnVulkan LANGUAGES CXX)
 
+# CMake 4.x 移除了对 cmake_minimum_required(VERSION < 3.5) 的兼容，
+# 而 GLM 1.0.1 这类较老的依赖仍声明旧版本号，直接 add_subdirectory 会硬报错。
+# 这个变量让 CMake 4.x 放行它们；CMake 3.x 不认识它，当普通缓存变量忽略，无副作用。
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING
+    "Allow dependencies declaring an old cmake_minimum_required (needed on CMake 4.x)")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -42,10 +48,14 @@ message(STATUS "glslc          : ${GLSLC_EXECUTABLE}")
 # ---------------------------------------------------------------------------
 include(FetchContent)
 
-set(GLFW_GIT_URL "https://github.com/glfw/glfw.git"  CACHE STRING "GLFW 仓库地址")
-set(GLFW_GIT_TAG "3.4"                               CACHE STRING "GLFW 版本")
-set(GLM_GIT_URL  "https://github.com/g-truc/glm.git" CACHE STRING "GLM 仓库地址")
-set(GLM_GIT_TAG  "1.0.1"                             CACHE STRING "GLM 版本")
+# 默认用 Gitee 官方镜像（"Gitee 极速下载"，mirrors 组，会跟上游同步）。
+#
+# 原因：实测这台机器上 github.com:443 连不上（TCP 层 21 秒超时），而 gitee.com 正常。
+# 想换回 GitHub 或别的源，用 -DGLFW_GIT_URL=... / -DGLM_GIT_URL=... 覆盖即可。
+set(GLFW_GIT_URL "https://gitee.com/mirrors/glfw.git" CACHE STRING "GLFW 仓库地址")
+set(GLFW_GIT_TAG "3.4"                                CACHE STRING "GLFW 版本")
+set(GLM_GIT_URL  "https://gitee.com/mirrors/glm.git"  CACHE STRING "GLM 仓库地址")
+set(GLM_GIT_TAG  "1.0.1"                              CACHE STRING "GLM 版本")
 
 set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 

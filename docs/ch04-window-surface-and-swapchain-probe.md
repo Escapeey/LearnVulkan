@@ -4,6 +4,8 @@
 > [交换链](https://tutorial.vulkan.net.cn/Drawing_a_triangle/Presentation/Swap_chain)（前半：查询与选择）
 >
 > 前置：D3 完成（`physicalDevice` / `device` / `graphicsQueue` 就绪）
+>
+> 📊 **你这台机器的实测硬件数据**（交换链能力 / 队列族 / 呈现模式 / 深度格式）：[`your-gpu.md`](your-gpu.md)
 > 自检题：`docs/ch04-check.md`
 >
 > **本单元只做"查询和决策"，不创建交换链。** 创建在 D5。

@@ -4,6 +4,8 @@
 > [逻辑设备和队列](https://tutorial.vulkan.net.cn/Drawing_a_triangle/Setup/Logical_device_and_queues)
 >
 > 前置：D2 完成（`instance` 和 `debugMessenger` 已经能创建和销毁）
+>
+> 📊 **你这台机器的实测硬件数据**（交换链能力 / 队列族 / 呈现模式 / 深度格式）：[`your-gpu.md`](your-gpu.md)
 > 代码骨架：在 D2 的 `src/hello_triangle.cpp` 上继续加（D2 通过后我会补上 TODO 标记）
 > 自检题：`docs/ch03-check.md`
 

@@ -4,6 +4,8 @@
 > [图像视图](https://tutorial.vulkan.net.cn/Drawing_a_triangle/Presentation/Image_views)
 >
 > 前置：D4 完成（`surface` 已创建，三个 `choose*` 函数已就绪）
+>
+> 📊 **你这台机器的实测硬件数据**（交换链能力 / 队列族 / 呈现模式 / 深度格式）：[`your-gpu.md`](your-gpu.md)
 > 自检题：`docs/ch05-check.md`
 >
 > **本单元结束后你仍然看不到画面**，但你会第一次拥有"可以往上画的图像"。

@@ -183,7 +183,7 @@ Get-Item 'HKLM:\SOFTWARE\Khronos\Vulkan\ImplicitLayers' -ErrorAction SilentlyCon
 | `learn_vulkan` | `src/hello_triangle.cpp` | 教程主程序，D2 起才开始写 |
 
 ```powershell
-cd C:\Users\d00944037\Code\LearnVulkan
+cd LearnVulkan
 
 # 配置（首次会联网拉取 GLFW 和 GLM 源码，约 1-2 分钟）
 .\scripts\build.ps1 -Configure

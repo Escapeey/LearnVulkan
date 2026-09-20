@@ -69,14 +69,22 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
                                       const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
                                       const VkAllocationCallbacks* pAllocator,
                                       VkDebugUtilsMessengerEXT* pDebugMessenger) {
-    // TODO(ch02)
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+        instance, "vkCreateDebugUtilsMessengerEXT");
+    if (func != nullptr) {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
     return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance,
                                    VkDebugUtilsMessengerEXT debugMessenger,
                                    const VkAllocationCallbacks* pAllocator) {
-    // TODO(ch02)
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+        instance, "vkDestroyDebugUtilsMessengerEXT");
+    if (func != nullptr) {
+        func(instance, debugMessenger, pAllocator);
+    }
 }
 
 // ===========================================================================
@@ -106,7 +114,10 @@ private:
     //
     //  想一想：为什么必须关掉 GLFW_RESIZABLE？如果不关，缩放窗口时会发生什么？
     void initWindow() {
-        // TODO(ch02)
+        glfwInit();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
     }
 
     // -----------------------------------------------------------------------
@@ -156,7 +167,41 @@ private:
     //         else                       { createInfo.enabledLayerCount = 0; createInfo.pNext = nullptr; }
     //    f) vkCreateInstance(&createInfo, nullptr, &instance)，失败就 throw std::runtime_error
     void createInstance() {
-        // TODO(ch02)
+        if (enableValidationLayers && !checkValidationLayerSupport()) {
+            throw std::runtime_error("validation layers requested, but not available!");
+        }
+
+        VkApplicationInfo appInfo{};
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName = "No Engine";
+        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.apiVersion = VK_API_VERSION_1_0;
+
+        VkInstanceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pApplicationInfo = &appInfo;
+
+        auto extensions = getRequiredExtensions();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        createInfo.ppEnabledExtensionNames = extensions.data();
+
+        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+        if (enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+            createInfo.ppEnabledLayerNames = validationLayers.data();
+
+            populateDebugMessengerCreateInfo(debugCreateInfo);
+            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
+        } else {
+            createInfo.enabledLayerCount = 0;
+            createInfo.pNext = nullptr;
+        }
+
+        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create instance!");
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -168,8 +213,16 @@ private:
     //    3. enableValidationLayers 为真时 push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
     //       用这个宏，不要手写字符串，否则拼错了验证层只会给你一个含糊的错误
     std::vector<const char*> getRequiredExtensions() {
-        // TODO(ch02)
-        return {};
+        uint32_t glfwExtensionCount = 0;
+        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+        if (enableValidationLayers) {
+            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
+
+        return extensions;
     }
 
     // -----------------------------------------------------------------------
@@ -181,8 +234,26 @@ private:
     //    3. 对 validationLayers 里每个名字，在 availableLayers 里 strcmp 查找
     //       有一个找不到就 return false
     bool checkValidationLayerSupport() {
-        // TODO(ch02)
-        return false;
+        uint32_t layerCount = 0;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        for (const char* layerName : validationLayers) {
+            bool layerFound = false;
+            for (const auto& layerProperties : availableLayers) {
+                if (strcmp(layerName, layerProperties.layerName) == 0) {
+                    layerFound = true;
+                    break;
+                }
+            }
+            if (!layerFound) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // -----------------------------------------------------------------------
@@ -194,7 +265,14 @@ private:
     //       populateDebugMessengerCreateInfo(createInfo);
     //    3. 调用你自己写的 CreateDebugUtilsMessengerEXT，不是 VK_SUCCESS 就 throw
     void setupDebugMessenger() {
-        // TODO(ch02)
+        if (!enableValidationLayers) return;
+
+        VkDebugUtilsMessengerCreateInfoEXT createInfo;
+        populateDebugMessengerCreateInfo(createInfo);
+
+        if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+            throw std::runtime_error("failed to set up debug messenger!");
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -209,8 +287,15 @@ private:
     //    - pfnUserCallback = debugCallback
     //    - pUserData      可选，教程传 nullptr
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
-        // TODO(ch02)
         createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.pfnUserCallback = debugCallback;
+        createInfo.pUserData = nullptr;
     }
 
     // -----------------------------------------------------------------------
@@ -225,11 +310,13 @@ private:
     //    - 永远 return VK_FALSE
     //    - 进阶：用 pUserData 传 this 指针进来，这样回调里可以访问类成员
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
-        const VkDebugUtilsMessengerCallbackDataEXT* /*pCallbackData*/,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* /*pUserData*/) {
-        // TODO(ch02)
+        if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+        }
         return VK_FALSE;
     }
 
@@ -243,7 +330,15 @@ private:
     //     亲眼看到验证层报 "destroyed after VkInstance" 之类的错误，然后再改回来。
     //     这一步别跳过 —— 它是你学会读验证层报错的起点。
     void cleanup() {
-        // TODO(ch02)
+        if (enableValidationLayers) {
+            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+        }
+
+        vkDestroyInstance(instance, nullptr);
+
+        glfwDestroyWindow(window);
+
+        glfwTerminate();
     }
 };
 

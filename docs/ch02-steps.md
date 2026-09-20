@@ -15,7 +15,7 @@
 ## 开工前
 
 ```powershell
-cd C:\Users\d00944037\Code\LearnVulkan
+cd LearnVulkan
 .\scripts\build.ps1        # 确认当前骨架能编译（应该秒过）
 ```
 

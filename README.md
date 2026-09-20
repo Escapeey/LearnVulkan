@@ -20,7 +20,7 @@
 ## 快速开始（环境装好之后）
 
 ```powershell
-cd C:\Users\d00944037\Code\LearnVulkan
+cd LearnVulkan
 
 .\scripts\build.ps1                   # 配置 + 编译（依赖已在 third_party\，不需要联网）
 .\scripts\run.ps1 -Target env_check   # 环境自检（换机器/升级驱动后可重跑）
@@ -117,6 +117,9 @@ LearnVulkan/
 │   ├─ ch02-steps.md         D2 的**分步实现指南**（5 个检查点，边写边验证）
 │   ├─ your-gpu.md          **你这台机器的实测硬件数据**（各单元都要对照）
 │   └─ verified.md          **已实测验证 vs 未验证清单**（该信任到什么程度）
+├─ qa/
+│   ├─ tooling.md            构建/运行工具问答（build.ps1 vs run.ps1）
+│   └─ d2.md                 D2 概念问答（实例/验证层/调试信使/pNext）
 ├─ src/
 │   ├─ hello_triangle.cpp  教程主程序（当前正在写的代码）
 │   └─ env_check.cpp       D1 环境自检工具
@@ -174,3 +177,10 @@ LearnVulkan/
 
 > 集显性能有限，但教程所有内容（含计算着色器）都在能力范围内。
 > 如果卡顿，把窗口调小（`800x600` 已经够用）、关掉其他占显存的程序。
+
+---
+
+## 许可
+
+- 本仓库的学习笔记、讲义、代码骨架采用 [MIT License](LICENSE)。
+- 依赖库（GLFW、GLM）各自保留其原有许可证，见 `third_party/` 内对应源码。

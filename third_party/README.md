@@ -63,7 +63,7 @@ third_party/
 ### 方案 A：重新克隆（命令我在这台机器上验证过能通）
 
 ```powershell
-cd C:\Users\d00944037\Code\LearnVulkan
+cd LearnVulkan
 git clone --depth 1 --branch 3.4   https://gitee.com/mirrors/glfw.git third_party/glfw
 git clone --depth 1 --branch 1.0.1 https://gitee.com/mirrors/glm.git  third_party/glm
 ```

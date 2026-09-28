@@ -34,39 +34,36 @@ cd LearnVulkan
 | `env_check` | `src/env_check.cpp` | D1 环境自检（换机器/升级驱动后可重跑） |
 | `learn_vulkan` | `src/hello_triangle.cpp` | **教程主程序**，跟着章节一路长大 |
 
-> ## ✅ 当前进度：**D1 已完成**（实测通过）
+> ## ✅ 当前进度：**D10 已完成**，进入 D11（命令缓冲 + 渲染与呈现）
 >
-> 环境已就绪：VS **18 (2026)** + Vulkan SDK **1.4.357.0** + CMake 4.3.1；
-> GLFW 3.4 / GLM 1.0.1 已克隆到本地 `third_party/`；
-> `env_check.exe` 自检**全部通过**（loader 1.4.357 / 13 个实例扩展 / 9 个层，含 `VK_LAYER_KHRONOS_validation`）。
+> 环境：VS **18 (2026)** + Vulkan SDK **1.4.357.0**；GLFW 3.4 / GLM 1.0.1 在本地 `third_party/`；
+> `env_check.exe` 全绿（loader 1.4.357 / 13 实例扩展 / 9 层，含 `VK_LAYER_KHRONOS_validation`）。
 >
-> ### 👉 下一步：做 **D2**（基础代码 + Instance + 验证层）
-> 1. 先看 **[`docs/ch02-steps.md`](docs/ch02-steps.md)** —— 把 10 个函数拆成 5 个有即时反馈的检查点，
->    照着做，别一次全写完再调错
-> 2. 讲义 [`docs/ch02-instance-and-validation.md`](docs/ch02-instance-and-validation.md) 查原理
-> 3. 实现 `src/hello_triangle.cpp` 里那 10 处 `// TODO(ch02)`
-> 4. `.\scripts\build.ps1` → `.\scripts\run.ps1`
-> 5. 卡住就把**验证层报错原文**贴给我
+> ### 👉 下一步：做 **D11**（命令缓冲 + 渲染与呈现 —— 第一次出图 🎉）
+> 1. 读讲义 **[`docs/ch11-command-buffers-and-presentation.md`](docs/ch11-command-buffers-and-presentation.md)**（动手前先读）
+> 2. 教程对应章节 Command_buffers、Rendering_and_presentation
+> 3. 写 `createCommandPool()` / `createCommandBuffer()` / `createSyncObjects()`
+> 4. 写 `recordCommandBuffer()`（begin render pass → bind → draw → end render pass）+ `drawFrame()`（acquire → submit → present）
+> 5. `mainLoop()` 每帧调 `drawFrame()`、末尾 `vkDeviceWaitIdle`；`cleanup()` 加 2 个 semaphore + 1 个 fence + commandPool 的销毁
+> 6. `.\scripts\build.ps1` → `.\scripts\run.ps1`
+> 7. 卡住就把**编译报错原文** + 你的代码贴给我（别只说"报错了"）
 >
-> ℹ️ **现在跑 `learn_vulkan.exe` 会立刻报一句 `window 是 nullptr —— 你还没实现 initWindow()` 然后退出**，
-> 这是骨架里的保护，检查点 1 就是解决它。
+> 🎉 D11 结束时**彩色三角形第一次出现在屏幕上**——黑底 RGB 三角形。
 >
-> （没有这个保护的话，`glfwWindowShouldClose(nullptr)` 会触发 GLFW 内部 `window.c` 的 assert，
-> 在 Debug 构建下**弹模态对话框把程序彻底挂住** —— 没输出、终端不返回，是最难查的一种失败。实测过。）
->
-> ✅ **你的起点已验证过**：我照这份骨架写了份临时参考实现，**签名一行没改就编译通过**，
-> 正常路径跑出 `消息总数=0 ERROR=0`，故意犯错路径精确报出 `VUID-vkDestroyInstance-instance-00629`。
-> 所以如果你卡住，**不是骨架的问题**，把报错贴给我就行。
->
-> **D2 – D6 讲义与自检题均已备好**：
+> **已完成 / 已备好的讲义与自检题**：
 > [D2 实例与验证层](docs/ch02-instance-and-validation.md) ·
 > [D3 物理设备与队列](docs/ch03-physical-device-and-queues.md) ·
 > [D4 窗口表面与交换链探测](docs/ch04-window-surface-and-swapchain-probe.md) ·
 > [D5 交换链与图像视图](docs/ch05-swapchain-and-image-views.md) ·
-> [D6 着色器模块](docs/ch06-shader-modules.md)
+> [D6 着色器模块](docs/ch06-shader-modules.md) ·
+> [D7 固定功能·上](docs/ch07-fixed-functions-1.md) ·
+> [D8 固定功能·下](docs/ch08-fixed-functions-2.md) ·
+> [D9 渲染通道](docs/ch09-render-pass.md) ·
+> [D10 帧缓冲 + 图形管线](docs/ch10-framebuffers-and-pipeline.md) ·
+> [D11 命令缓冲 + 呈现](docs/ch11-command-buffers-and-presentation.md)
 >
-> **只有 D2 有代码骨架。** 其余单元的 `// TODO` 标记，等你做完前一单元、我 review 过你的
-> 实现之后再补 —— 免得 `src/hello_triangle.cpp` 里堆满还没轮到你的标记，反而看不清当前该写什么。
+> 各单元的 `// TODO(chNN)` 骨架随进度逐单元补齐：做完当前单元、我 review 过实现后，再补下一单元的标记，
+> 免得 `src/hello_triangle.cpp` 里堆满还没轮到你的标记，看不清当前该写什么。
 
 ---
 
@@ -112,7 +109,7 @@ LearnVulkan/
 ├─ cmake/Shaders.cmake     GLSL -> SPIR-V 规则
 ├─ docs/
 │   ├─ opengl-to-vulkan.md   OpenGL -> Vulkan 职责对照词典（建议打印）
-│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D6 已备）
+│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D11 已备）
 │   ├─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
 │   ├─ ch02-steps.md         D2 的**分步实现指南**（5 个检查点，边写边验证）
 │   ├─ your-gpu.md          **你这台机器的实测硬件数据**（各单元都要对照）

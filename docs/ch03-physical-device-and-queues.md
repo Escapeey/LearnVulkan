@@ -13,13 +13,13 @@
 
 ## 0. 本单元你要亲手写的
 
-| 函数 | 难度 | 说明 |
-|---|---|---|
-| `pickPhysicalDevice()` | ★★ | 又见两段式枚举 |
-| `isDeviceSuitable()` | ★★ | 现在是 `return true`，但它会一直长大到 D19 |
-| `findQueueFamilies()` | ★★★ | 本单元核心，第一次用 `std::optional` |
-| `createLogicalDevice()` | ★★★ | 4 个结构体 + 一个生命周期陷阱 |
-| 更新 `cleanup()` | ★ | 加一行 `vkDestroyDevice` |
+| 函数                    | 难度 | 说明                                       |
+| ----------------------- | ---- | ------------------------------------------ |
+| `pickPhysicalDevice()`  | ★★   | 又见两段式枚举                             |
+| `isDeviceSuitable()`    | ★★   | 现在是 `return true`，但它会一直长大到 D19 |
+| `findQueueFamilies()`   | ★★★  | 本单元核心，第一次用 `std::optional`       |
+| `createLogicalDevice()` | ★★★  | 4 个结构体 + 一个生命周期陷阱              |
+| 更新 `cleanup()`        | ★    | 加一行 `vkDestroyDevice`                   |
 
 ---
 
@@ -39,12 +39,12 @@ VkInstance                    ← D2，程序与 Vulkan 的连接
 
 ### 四个对象的本质区别（**这是本单元最重要的认知**）
 
-| 对象 | 是什么 | 谁创建 | 谁销毁 |
-|---|---|---|---|
-| `VkInstance` | 你的程序 ↔ loader ↔ 驱动的连接 | 你（`vkCreateInstance`） | 你（`vkDestroyInstance`） |
-| `VkPhysicalDevice` | **系统里的一块物理显卡，只读句柄** | 系统（枚举出来而已） | **随 instance 隐式销毁，你管不着** |
-| `VkDevice` | 逻辑设备，你与某块 GPU 的工作会话 | 你（`vkCreateDevice`） | 你（`vkDestroyDevice`） |
-| `VkQueue` | 向 GPU 提交命令的通道 | 随 `VkDevice` 自动创建 | **随 device 隐式销毁，你管不着** |
+| 对象               | 是什么                             | 谁创建                   | 谁销毁                             |
+| ------------------ | ---------------------------------- | ------------------------ | ---------------------------------- |
+| `VkInstance`       | 你的程序 ↔ loader ↔ 驱动的连接     | 你（`vkCreateInstance`） | 你（`vkDestroyInstance`）          |
+| `VkPhysicalDevice` | **系统里的一块物理显卡，只读句柄** | 系统（枚举出来而已）     | **随 instance 隐式销毁，你管不着** |
+| `VkDevice`         | 逻辑设备，你与某块 GPU 的工作会话  | 你（`vkCreateDevice`）   | 你（`vkDestroyDevice`）            |
+| `VkQueue`          | 向 GPU 提交命令的通道              | 随 `VkDevice` 自动创建   | **随 device 隐式销毁，你管不着**   |
 
 > **反直觉点一**：`VkPhysicalDevice` 不是你"创建"的。它是 `vkEnumeratePhysicalDevices` 从系统里**枚举**出来的、只读的句柄。你既不能创建它，也不能销毁它。
 >
@@ -54,14 +54,14 @@ VkInstance                    ← D2，程序与 Vulkan 的连接
 
 ## 2. OpenGL 对照
 
-| | OpenGL | Vulkan |
-|---|---|---|
-| 系统里有几块 GPU | **一个**（驱动替你选的，SLI/CrossFire 也只是合并呈现） | **N 块，全部枚举给你** |
-| 怎么选 | 驱动面板 / 电源设置 / 应用配置 | 你写 `isDeviceSuitable()` 或 `rateDeviceSuitability()` |
-| 能同时用多块吗 | 不能（除非厂商扩展） | 能，各自创建 `VkDevice` |
-| 能创建多个"会话"吗 | 不能（一个 context） | 能，同一 GPU 上可创建多个 `VkDevice` |
-| 命令提交 | `glDrawElements` 内部隐含 | 显式查队列族 → `vkGetDeviceQueue` → `vkQueueSubmit` |
-| "队列族"概念 | ❌ 完全不可见 | 显式，且是你**必须**掌握的分类体系 |
+|                    | OpenGL                                                 | Vulkan                                                 |
+| ------------------ | ------------------------------------------------------ | ------------------------------------------------------ |
+| 系统里有几块 GPU   | **一个**（驱动替你选的，SLI/CrossFire 也只是合并呈现） | **N 块，全部枚举给你**                                 |
+| 怎么选             | 驱动面板 / 电源设置 / 应用配置                         | 你写 `isDeviceSuitable()` 或 `rateDeviceSuitability()` |
+| 能同时用多块吗     | 不能（除非厂商扩展）                                   | 能，各自创建 `VkDevice`                                |
+| 能创建多个"会话"吗 | 不能（一个 context）                                   | 能，同一 GPU 上可创建多个 `VkDevice`                   |
+| 命令提交           | `glDrawElements` 内部隐含                              | 显式查队列族 → `vkGetDeviceQueue` → `vkQueueSubmit`    |
+| "队列族"概念       | ❌ 完全不可见                                           | 显式，且是你**必须**掌握的分类体系                     |
 
 ### 为什么 OpenGL 里你从没关心过这些？
 
@@ -77,12 +77,12 @@ Vulkan 把选择权交给你，也把责任交给你。在只有一块 GPU 的�
 
 教程现在把它写成 `return true`，因为它还没教你怎么判断。但它在后续章节会一路扩展：
 
-| 章节 | 会加进 `isDeviceSuitable` 的检查 |
-|---|---|
-| **D3（现在）** | `indices.isComplete()` —— 有没有图形队列族 |
-| D5 | 有没有 `VK_KHR_swapchain` 扩展 + 交换链的格式/呈现模式是否非空 |
-| D19 | 深度格式 `VK_FORMAT_D32_SFLOAT` 是否被支持 |
-| D22 | 多重采样是否支持 |
+| 章节           | 会加进 `isDeviceSuitable` 的检查                               |
+| -------------- | -------------------------------------------------------------- |
+| **D3（现在）** | `indices.isComplete()` —— 有没有图形队列族                     |
+| D5             | 有没有 `VK_KHR_swapchain` 扩展 + 交换链的格式/呈现模式是否非空 |
+| D19            | 深度格式 `VK_FORMAT_D32_SFLOAT` 是否被支持                     |
+| D22            | 多重采样是否支持                                               |
 
 **所以别小看这个"return true"**。它是设备选择的策略入口，后面会变成这样：
 
@@ -122,12 +122,12 @@ int rateDeviceSuitability(VkPhysicalDevice device) {
 
 关键点：**一个队列族可以同时支持多种能力**（用位掩码表示）：
 
-| 标志 | 含义 |
-|---|---|
-| `VK_QUEUE_GRAPHICS_BIT` | 图形命令（画三角形） |
-| `VK_QUEUE_COMPUTE_BIT` | 计算命令（D23） |
-| `VK_QUEUE_TRANSFER_BIT` | 内存传输（D14 的 staging buffer） |
-| `VK_QUEUE_SPARSE_BINDING_BIT` | 稀疏内存绑定 |
+| 标志                          | 含义                              |
+| ----------------------------- | --------------------------------- |
+| `VK_QUEUE_GRAPHICS_BIT`       | 图形命令（画三角形）              |
+| `VK_QUEUE_COMPUTE_BIT`        | 计算命令（D23）                   |
+| `VK_QUEUE_TRANSFER_BIT`       | 内存传输（D14 的 staging buffer） |
+| `VK_QUEUE_SPARSE_BINDING_BIT` | 稀疏内存绑定                      |
 
 `queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT` —— 这就是判断方法（位与）。
 
@@ -255,6 +255,7 @@ void cleanup() {
 **需要手动销毁的**：`VkDevice` → `VkDebugUtilsMessengerEXT` → `VkInstance`
 
 **不需要手动销毁的**：
+
 - `VkPhysicalDevice` —— 随 instance 隐式销毁
 - `VkQueue` —— 随 device 隐式销毁
 
@@ -264,15 +265,15 @@ void cleanup() {
 
 ## 8. 本单元最容易踩的坑
 
-| # | 现象 | 根因 | 处理 |
-|---|---|---|---|
-| 1 | `std::optional` 不是 `std` 的成员 | 忘了 `#include <optional>` | 加上 |
-| 2 | 崩溃在 `vkCreateDevice` 或之后 | `pQueuePriorities` 指向的 float 已离开作用域 | 用局部变量，且活到 `vkCreateDevice` 之后 |
-| 3 | 抛 `std::bad_optional_access` | 没检查 `has_value()` 就调 `.value()` | 先 `isComplete()` 判断 |
-| 4 | 验证层报 `queueFamilyIndex` 越界 | 循环里 `i` 的自增位置写错（`break` 在 `i++` 之前） | 教程的写法是 `break` 检查放在末尾，注意抄对 |
-| 5 | 设备选错（笔记本双显卡） | 用了"第一个满足条件的"而不是评分 | 实现 `rateDeviceSuitability` |
-| 6 | 退出时验证层报 `VkDevice` 泄漏 | `cleanup()` 漏了 `vkDestroyDevice` | 加上 |
-| 7 | `queueCreateInfoCount` 与数组长度不匹配 | 手写数字写错 | 用 `1` 或 `static_cast<uint32_t>(...)` |
+| #   | 现象                                    | 根因                                               | 处理                                        |
+| --- | --------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| 1   | `std::optional` 不是 `std` 的成员       | 忘了 `#include <optional>`                         | 加上                                        |
+| 2   | 崩溃在 `vkCreateDevice` 或之后          | `pQueuePriorities` 指向的 float 已离开作用域       | 用局部变量，且活到 `vkCreateDevice` 之后    |
+| 3   | 抛 `std::bad_optional_access`           | 没检查 `has_value()` 就调 `.value()`               | 先 `isComplete()` 判断                      |
+| 4   | 验证层报 `queueFamilyIndex` 越界        | 循环里 `i` 的自增位置写错（`break` 在 `i++` 之前） | 教程的写法是 `break` 检查放在末尾，注意抄对 |
+| 5   | 设备选错（笔记本双显卡）                | 用了"第一个满足条件的"而不是评分                   | 实现 `rateDeviceSuitability`                |
+| 6   | 退出时验证层报 `VkDevice` 泄漏          | `cleanup()` 漏了 `vkDestroyDevice`                 | 加上                                        |
+| 7   | `queueCreateInfoCount` 与数组长度不匹配 | 手写数字写错                                       | 用 `1` 或 `static_cast<uint32_t>(...)`      |
 
 ---
 

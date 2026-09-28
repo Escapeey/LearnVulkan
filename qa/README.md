@@ -11,6 +11,7 @@
 |---|---|
 | [`tooling.md`](tooling.md) | 构建 / 运行工具：`build.ps1` vs `run.ps1` |
 | [`d2.md`](d2.md) | D2 概念问答：实例、验证层、调试信使、`pNext` 等 |
+| [`d3.md`](d3.md) | D3 概念问答：物理设备 / 逻辑设备 / 队列族 / `std::optional` 等 |
 
 ## 约定
 

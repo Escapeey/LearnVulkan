@@ -1,5 +1,5 @@
-// ===========================================================================
-//  hello_triangle.cpp —— LearnVulkan 教程主程序（D2 → D11）
+﻿// ===========================================================================
+//  hello_triangle.cpp —— LearnVulkan 教程主程序（D2 → D12）
 //
 //  跟着 https://tutorial.vulkan.net.cn/ 从 OpenGL 转 Vulkan，一个文件一路长大。
 //  D11 已出图；D12 进行中：飞行帧（修单帧在飞的同步告警）+ 交换链重建（缩放不崩）。
@@ -130,7 +130,7 @@ private:
     VkCommandPool commandPool = VK_NULL_HANDLE;
 
     // 命令缓冲：记录一帧的所有 GPU 命令。
-    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    std::vector<VkCommandBuffer> commandBuffers;   // D12：每帧一套，轮转使用
 
     // 同步对象（D12 起数组化：每个"在飞帧"一套，互不打架）。
     //   imageAvailableSemaphores[i]  GPU 信号："交换链图可用了，开始画第 i 帧"
@@ -953,13 +953,14 @@ private:
 
     void createCommandBuffer() {
         // 命令缓冲是"分配"（allocate）不是"创建"（create）—— 它从 commandPool 里来。
+        commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = commandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = 1;
+        allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-        if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
@@ -968,7 +969,7 @@ private:
         // 三个同步数组扩到 MAX_FRAMES_IN_FLIGHT；imagesInFlight 按"交换链图像数"来，
         // 初始全是 VK_NULL_HANDLE（还没任何图被占用）。
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        renderFinishedSemaphores.resize(swapChainImages.size());
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
         imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
 
@@ -980,9 +981,17 @@ private:
         // 初始就 SIGNALED：第一帧还没任何提交，unsignaled 会让 vkWaitForFences 永远等下去。
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        // TODO(ch12): 循环 MAX_FRAMES_IN_FLIGHT 次，每次创建 2 个信号量 + 1 个栅栏，
-        //             分别写进 imageAvailableSemaphores[i] / renderFinishedSemaphores[i] / inFlightFences[i]；
-        //             任一失败就 throw。记得每个都传 &semaphoreInfo / &fenceInfo。
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create synchronization objects for a frame!");
+            }
+        }
+        for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) {
+            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create render finished semaphore for a frame!");
+            }
+        }
     }
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -1030,19 +1039,15 @@ private:
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        // TODO(ch12): 图像复用护栏（修 00067 的关键两步）
-        //   ① 若这张图还被上一帧的 fence 占着，先 vkWaitForFences 等它做完；
-        //   ② 把当前帧的 fence 登记进 imagesInFlight[imageIndex]。
-        // 提示：
-        //   if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-        //       vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-        //   }
-        //   imagesInFlight[imageIndex] = inFlightFences[currentFrame];
+        if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+            vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+        }
+        imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
-        vkResetCommandBuffer(commandBuffer, 0);
-        recordCommandBuffer(commandBuffer, imageIndex);
+        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+        recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1053,9 +1058,9 @@ private:
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-        VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+        VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[imageIndex] };
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -1074,16 +1079,12 @@ private:
 
         result = vkQueuePresentKHR(graphicsQueue, &presentInfo);
 
-        // TODO(ch12): 处理呈现结果
-        //   OUT_OF_DATE / SUBOPTIMAL / framebufferResized → 把 framebufferResized 清零 + recreateSwapChain()；
-        //   其它非 SUCCESS → throw。
-        // 提示：
-        //   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
-        //       framebufferResized = false;
-        //       recreateSwapChain();
-        //   } else if (result != VK_SUCCESS) {
-        //       throw std::runtime_error("failed to present swap chain image!");
-        //   }
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
+            framebufferResized = false;
+            recreateSwapChain();
+        } else if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;   // 轮转到下一帧
     }
@@ -1092,25 +1093,32 @@ private:
     //  交换链重建（D12）
     // -----------------------------------------------------------------------
     void cleanupSwapChain() {
-        // TODO(ch12): 逆序销毁"每次重建都要重来"的对象：
-        //   ① framebuffers 循环 → ② imageViews 循环 → ③ vkDestroySwapchainKHR
-        //   → ④ vkDestroyPipeline → ⑤ vkDestroyPipelineLayout → ⑥ vkDestroyRenderPass
-        // （管线和渲染通道也要重建：管线里 viewport/scissor 是静态烤死的，尺寸变了得重做。）
+        for (auto framebuffer : swapChainFramebuffers) {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+        }
+        for (auto imageView : swapChainImageViews) {
+            vkDestroyImageView(device, imageView, nullptr);
+        }
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
     }
 
     void recreateSwapChain() {
-        // TODO(ch12): 四步
-        //   ① 窗口最小化时 framebuffer 尺寸是 0，循环等它恢复：
-        //        int width = 0, height = 0;
-        //        glfwGetFramebufferSize(window, &width, &height);
-        //        while (width == 0 || height == 0) {
-        //            glfwGetFramebufferSize(window, &width, &height);
-        //            glfwWaitEvents();
-        //        }
-        //   ② vkDeviceWaitIdle(device) —— 等所有在飞命令干完再拆。
-        //   ③ cleanupSwapChain();
-        //   ④ 按顺序重建：createSwapChain → createImageViews → createRenderPass
-        //        → createGraphicsPipeline → createFramebuffers。
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(window, &width, &height);
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(window, &width, &height);
+            glfwWaitEvents();
+        }
+        vkDeviceWaitIdle(device);   // 等所有在飞命令干完再拆
+        cleanupSwapChain();
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createGraphicsPipeline();
+        createFramebuffers();
     }
 
     // -----------------------------------------------------------------------
@@ -1119,9 +1127,13 @@ private:
     void cleanup() {
         cleanupSwapChain();   // 交换链相关（含 renderPass/pipeline/pipelineLayout）都归到这里
 
-        // TODO(ch12): 循环销毁 MAX_FRAMES_IN_FLIGHT 套同步对象
-        //   （renderFinishedSemaphores[i] / imageAvailableSemaphores[i] / inFlightFences[i]）。
-        // 原来的单数三件套 vkDestroySemaphore×2 + vkDestroyFence 删掉。
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device, inFlightFences[i], nullptr);
+        }
+        for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) {
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+        }
 
         vkDestroyCommandPool(device, commandPool, nullptr);   // 连带释放其下所有命令缓冲
 

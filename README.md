@@ -34,21 +34,21 @@ cd LearnVulkan
 | `env_check` | `src/env_check.cpp` | D1 环境自检（换机器/升级驱动后可重跑） |
 | `learn_vulkan` | `src/hello_triangle.cpp` | **教程主程序**，跟着章节一路长大 |
 
-> ## ✅ 当前进度：**D10 已完成**，进入 D11（命令缓冲 + 渲染与呈现）
+> ## ✅ 当前进度：**D11 已完成**（彩色三角形出图 🎉），进入 D12（飞行帧 + 交换链重建 —— M1 收官）
 >
 > 环境：VS **18 (2026)** + Vulkan SDK **1.4.357.0**；GLFW 3.4 / GLM 1.0.1 在本地 `third_party/`；
 > `env_check.exe` 全绿（loader 1.4.357 / 13 实例扩展 / 9 层，含 `VK_LAYER_KHRONOS_validation`）。
 >
-> ### 👉 下一步：做 **D11**（命令缓冲 + 渲染与呈现 —— 第一次出图 🎉）
-> 1. 读讲义 **[`docs/ch11-command-buffers-and-presentation.md`](docs/ch11-command-buffers-and-presentation.md)**（动手前先读）
-> 2. 教程对应章节 Command_buffers、Rendering_and_presentation
-> 3. 写 `createCommandPool()` / `createCommandBuffer()` / `createSyncObjects()`
-> 4. 写 `recordCommandBuffer()`（begin render pass → bind → draw → end render pass）+ `drawFrame()`（acquire → submit → present）
-> 5. `mainLoop()` 每帧调 `drawFrame()`、末尾 `vkDeviceWaitIdle`；`cleanup()` 加 2 个 semaphore + 1 个 fence + commandPool 的销毁
-> 6. `.\scripts\build.ps1` → `.\scripts\run.ps1`
+> ### 👉 下一步：做 **D12**（飞行帧 + 交换链重建 —— M1 收官 🏁）
+> 1. 读讲义 **[`docs/ch12-frames-in-flight-and-swapchain-recreation.md`](docs/ch12-frames-in-flight-and-swapchain-recreation.md)**（动手前先读）
+> 2. 教程对应章节 Frames_in_flight、Swap_chain_recreation
+> 3. 同步对象数组化：`imageAvailableSemaphores` / `renderFinishedSemaphores` / `inFlightFences` + `imagesInFlight` + `currentFrame`
+> 4. `createSyncObjects()` 循环创建；`drawFrame()` 加 `imagesInFlight` 栅栏护栏 + 处理 `OUT_OF_DATE`
+> 5. 新增 `cleanupSwapChain()` + `recreateSwapChain()` + `framebufferResizeCallback`；窗口改可缩放（`GLFW_RESIZABLE, GLFW_TRUE`）
+> 6. `.\scripts\build.ps1` → `.\scripts\run.ps1`，拖窗口 / 最小化还原都别崩
 > 7. 卡住就把**编译报错原文** + 你的代码贴给我（别只说"报错了"）
 >
-> 🎉 D11 结束时**彩色三角形第一次出现在屏幕上**——黑底 RGB 三角形。
+> 🏁 D12 结束时验证层日志 **zero error**（D11 那个 00067 告警消失），窗口怎么拖都不崩 → **M1 达成**。
 >
 > **已完成 / 已备好的讲义与自检题**：
 > [D2 实例与验证层](docs/ch02-instance-and-validation.md) ·
@@ -60,7 +60,8 @@ cd LearnVulkan
 > [D8 固定功能·下](docs/ch08-fixed-functions-2.md) ·
 > [D9 渲染通道](docs/ch09-render-pass.md) ·
 > [D10 帧缓冲 + 图形管线](docs/ch10-framebuffers-and-pipeline.md) ·
-> [D11 命令缓冲 + 呈现](docs/ch11-command-buffers-and-presentation.md)
+> [D11 命令缓冲 + 呈现](docs/ch11-command-buffers-and-presentation.md) ·
+> [D12 飞行帧 + 交换链重建](docs/ch12-frames-in-flight-and-swapchain-recreation.md)
 >
 > 各单元的 `// TODO(chNN)` 骨架随进度逐单元补齐：做完当前单元、我 review 过实现后，再补下一单元的标记，
 > 免得 `src/hello_triangle.cpp` 里堆满还没轮到你的标记，看不清当前该写什么。
@@ -109,7 +110,7 @@ LearnVulkan/
 ├─ cmake/Shaders.cmake     GLSL -> SPIR-V 规则
 ├─ docs/
 │   ├─ opengl-to-vulkan.md   OpenGL -> Vulkan 职责对照词典（建议打印）
-│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D11 已备）
+│   ├─ chNN-<主题>.md        每个单元的**讲义**（D2–D12 已备）
 │   ├─ chNN-check.md         每个单元的**自检题**（含折叠提示与答题记录表）
 │   ├─ ch02-steps.md         D2 的**分步实现指南**（5 个检查点，边写边验证）
 │   ├─ your-gpu.md          **你这台机器的实测硬件数据**（各单元都要对照）
